@@ -1,0 +1,155 @@
+<?php
+/**
+ * 留言板主页，显示留言内容
+ * User: chuwen
+ * Date: 2020/6/13
+ * Email: <chenwenzhou@aliyun.com>
+ */
+
+include_once __DIR__ . "/lib/common.php";
+
+$page = intval(get('page', 1));
+
+/**
+ * 如果页码小于 0
+ * 则返回首页
+ */
+if($page < 1){
+    header("Location: index.php");
+    die;
+}
+
+
+$uidTmp = [];
+$cTmp = [];//储存帖子
+
+//页码*每页显示多少数据      每页显示多少数据
+$sql = sprintf("SELECT * FROM `comments` LIMIT %d,%d", ($page-1)*20, 20);
+$res = $DB->query($sql);
+
+//最大页码数量
+$max_page = ceil($res->num_rows/20);
+
+if($res){
+    while ($row = $res->fetch_assoc()) {
+        $uidTmp[] = $row['uid'];
+        $cTmp[] = $row;
+    }
+    $res->free_result();// 释放结果集
+}
+
+$uTmp = [];//储存用户信息
+$uidTmp = join(",", $uidTmp);
+
+//使用 WHERE IN 语法批量查询用户信息
+$res = $DB->query("SELECT uid,nickname,summary,sex,qq,email FROM users WHERE uid IN({$uidTmp})");
+if($res){
+    while ($row = $res->fetch_assoc()) {
+        $uTmp[$row['uid']] = $row;
+    }
+    $res->free_result();// 释放结果集
+}
+?>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="Wenzhou Chan">
+    <title>PHP留言板</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.0/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="./static/style.css">
+</head>
+<body>
+<nav class="navbar navbar-default navbar-fixed-top affix" role="navigation" id="slider_sub">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse"
+                    data-target="#example-navbar-collapse">
+                <span class="sr-only">切换导航</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="./" style="margin-left: 16px;">PHP留言板</a>
+        </div>
+        <div class="collapse navbar-collapse navbar-right" id="example-navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li class="active">
+                    <a href="./"><span class="glyphicon glyphicon-home" aria-hidden="true"></span> 首页</a>
+                </li>
+                <li>
+                    <a href="./login.php"><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> 登录</a>
+                </li>
+                <li>
+                    <a href="./reg.php"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> 免费注册</a>
+                </li>
+
+                <li class="dropdown">
+                    <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                       aria-haspopup="true"
+                       aria-expanded="false"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> 初文
+                        <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="javascript:void(0)">个人资料</a></li>
+                        <li><a href="javascript:void(0)">发布的留言</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="javascript:void(0)">退出登录</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="javascript:void(0)">后台管理</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container col-md-6 col-md-offset-3" style="padding-top: 72px;">
+    <form class="form-horizontal">
+        <textarea class="form-control" rows="6" name="content" required="required"
+                  placeholder="*请输入留言内容" title="请先登录后操作"></textarea>
+
+        <div class="form-group">
+            <div style="margin-top: 16px">
+                <div class="col-xs-4">
+                    <button type="reset" class="btn btn-default btn-lg btn-block">重置表单</button>
+                </div>
+                <div class="col-xs-8">
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">发表留言</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <?php foreach ($cTmp as $v): ?>
+        <div class="media">
+            <div class="media-left">
+                <a href="./userinfo.php?uid=<?php echo $v['uid']; ?>">
+                    <img class="media-object img-circle"
+                         src="https://q1.qlogo.cn/g?b=qq&nk=<?php echo $uTmp[$v['uid']]['qq']; ?>&s=640"
+                         alt="<?php echo $uTmp[$v['uid']]['qq'] ?> QQ头像">
+                </a>
+            </div>
+            <div class="media-body">
+                <div class="media-heading">
+                    <div class="nickname"><?php echo $uTmp[$v['uid']]['nickname']; ?></div>
+                    <div class="secondary">
+                        <span class="time"><?php echo formatTime($v['post_time']); ?></span>
+                        <span class="summary"><?php echo $uTmp[$v['uid']]['summary']; ?></span>
+                    </div>
+                </div>
+                <p><?php echo join("</p><p>", explode("\n", $v['contents'])); ?></p>
+            </div>
+        </div>
+    <?php endforeach; ?>
+
+    <?php echo multipage($max_page, $page+1); ?>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.0/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
