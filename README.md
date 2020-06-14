@@ -36,7 +36,7 @@ CREATE TABLE `comments` (
   `cid` int(11) NOT NULL AUTO_INCREMENT COMMENT '帖子ID',
   `uid` int(11) NOT NULL DEFAULT 0 COMMENT '关联 users 表的 uid', 
   `contents` TEXT NOT NULL COMMENT '留言内容',
-  `post_time` datetime DEFAULT NULL COMMENT '发表留言时间',
+  `send_time` datetime DEFAULT NULL COMMENT '发表留言时间',
   `post_ip` varchar(100) DEFAULT NULL COMMENT '发表留言时的IP地址',
   PRIMARY KEY (`cid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
