@@ -107,29 +107,14 @@ if (isset($_SERVER['REQUEST_METHOD']) && strtoupper($_SERVER['REQUEST_METHOD']) 
         </div>
         <div class="collapse navbar-collapse navbar-right" id="example-navbar-collapse">
             <ul class="nav navbar-nav">
+                <li >
+                    <a href="index.php"><span class="glyphicon glyphicon-home" aria-hidden="true"></span> 首页</a>
+                </li>
+                <li>
+                    <a href="login.php"><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> 登录</a>
+                </li>
                 <li class="active">
-                    <a href="./"><span class="glyphicon glyphicon-home" aria-hidden="true"></span> 首页</a>
-                </li>
-                <li>
-                    <a href="./login.php"><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> 登录</a>
-                </li>
-                <li>
-                    <a href="./reg.php"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> 免费注册</a>
-                </li>
-
-                <li class="dropdown">
-                    <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" role="button"
-                       aria-haspopup="true"
-                       aria-expanded="false"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> 初文
-                        <span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="javascript:void(0)">个人资料</a></li>
-                        <li><a href="javascript:void(0)">发布的留言</a></li>
-                        <li role="separator" class="divider"></li>
-                        <li><a href="javascript:void(0)">退出登录</a></li>
-                        <li role="separator" class="divider"></li>
-                        <li><a href="javascript:void(0)">后台管理</a></li>
-                    </ul>
+                    <a href="reg.php"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> 免费注册</a>
                 </li>
             </ul>
         </div>
