@@ -61,7 +61,8 @@ if($res){
     <meta name="author" content="Wenzhou Chan">
     <title>PHP留言板</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.0/dist/css/bootstrap.css">
-    <link rel="stylesheet" href="./static/style.css">
+    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="static/css/toastr.min.css">
 </head>
 <body>
 <nav class="navbar navbar-default navbar-fixed-top affix" role="navigation" id="slider_sub">
@@ -108,7 +109,7 @@ if($res){
 </nav>
 
 <div class="container col-md-6 col-md-offset-3" style="padding-top: 72px;">
-    <form class="form-horizontal">
+    <form class="form-horizontal" onsubmit="return submitMessage(this)">
         <textarea class="form-control" rows="6" name="content" required="required"
                   placeholder="*请输入留言内容" title="请先登录后操作"></textarea>
 
@@ -118,17 +119,18 @@ if($res){
                     <button type="reset" class="btn btn-default btn-lg btn-block">重置表单</button>
                 </div>
                 <div class="col-xs-8">
-                    <button type="submit" class="btn btn-primary btn-lg btn-block">发表留言</button>
+                    <button name="submitBtn" data-loading-text="发表留言中..."
+                            type="submit" class="btn btn-primary btn-lg btn-block">发表留言</button>
                 </div>
             </div>
         </div>
     </form>
 
     <?php foreach ($cTmp as $v): ?>
-        <div class="media">
+        <div id="<?php echo $v['cid']+10000; ?>" class="media">
             <div class="media-left">
                 <a target="_blank" href="./userinfo.php?uid=<?php echo $v['uid']+10000; ?>">
-                    <img class="media-object img-circle"
+                    <img class="media-object img-circle" title="点击查看用户资料"
                          src="https://q1.qlogo.cn/g?b=qq&nk=<?php echo $uTmp[$v['uid']]['qq']; ?>&s=640"
                          alt="<?php echo $uTmp[$v['uid']]['qq'] ?> QQ头像">
                 </a>
@@ -152,5 +154,7 @@ if($res){
 
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.0/dist/js/bootstrap.min.js"></script>
+<script src="static/js/toastr.min.js"></script>
+<script src="static/js/script.js"></script>
 </body>
 </html>
