@@ -10,7 +10,10 @@ include_once __DIR__ . "/lib/common.php";
 
 $uid = intval(get('uid', 0));
 
-$notFound = true;
+$notFound = true;//是否为未找到该用户，true：是，返回404页面
+$max_page = 1;//最大页码
+$page = intval(get('page', 1));//当前页码
+
 if($uid < 10001){
     header("HTTP/1.0 404 Not Found");
 }else{
@@ -22,13 +25,16 @@ if($uid < 10001){
         $userInfo = $res->fetch_assoc();
         $res->free_result();//用户信息数组
 
+        //查询当前用户的留言数量
         $sql = sprintf("SELECT COUNT(*) AS c FROM comments WHERE uid=%d", intval($uid)-10000);
         $res = $DB->query($sql);
         $count = $res->fetch_assoc()['c'];//发布了多少留言
+        $max_page = ceil($count/10);//最大页码数量
         $res->free_result();
 
-        $sql = sprintf("SELECT cid,LEFT(contents, 42) AS contents,send_time FROM comments WHERE uid=%d ORDER BY send_time DESC LIMIT 10",
-            intval($uid)-10000);
+        //查询当前页的留言
+        $sql = sprintf("SELECT cid,contents,send_time FROM comments WHERE uid=%d ORDER BY send_time DESC LIMIT %d,%d",
+            intval($uid)-10000, ($page-1)*10, 10);
         $res = $DB->query($sql);//查询最新10条留言
         $comment = $res->fetch_all(MYSQLI_ASSOC);
         $res->free_result();
@@ -52,7 +58,7 @@ if($uid < 10001){
     <meta name="author" content="Wenzhou Chan">
     <title>用户详细页面 - PHP留言板</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.0/dist/css/bootstrap.css">
-    <link rel="stylesheet" href="static/style.css">
+    <link rel="stylesheet" href="static/css/style.css">
 </head>
 <body>
 
@@ -145,30 +151,30 @@ if($uid < 10001){
 
     <div class="panel panel-info">
         <div class="panel-heading">
-            <h3 class="panel-title">最近发布的留言</h3>
+            <h3 class="panel-title">发布的留言 <small class="text-center">总数：<?php echo $count; ?>条</small></h3>
         </div>
         <table class="table table-hover">
             <thead>
             <tr>
                 <th>#</th>
                 <th>留言内容</th>
-                <th>留言时间</th>
-                <th>操作</th>
+                <th style="min-width: 88px;">留言时间</th>
+<!--                <th>操作</th>-->
             </tr>
             </thead>
             <tbody>
             <?php foreach ($comment as $row): ?>
                 <tr>
                     <th scope="row"><?php echo $row['cid']+10000; ?></th>
-                    <td title="查看完整留言内容，请点击右方 查看"><?php echo $row['contents']; ?>......</td>
+                    <td><?php echo join("</p><p>", explode("\n", $row['contents'])); ?></td>
                     <td><?php echo date("Y-m-d H:i", $row['send_time']); ?></td>
-                    <td><a title="点击查看完整留言" href="view.php?cid=<?php echo $row['cid']+10000; ?>">查看</td>
+<!--                    <td><a title="点击查看完整留言" href="view.php?cid=--><?php //echo $row['cid']+10000; ?><!--">查看</td>-->
                 </tr>
             <?php endforeach; ?>
 
             <tr>
-                <th colspan="4">
-                    <a class="flex-center" href="contents.php?uid=<?php echo $uid; ?>">查看 Ta 的全部留言</a>
+                <th colspan="3">
+                    <?php echo multipage($max_page, $page+1, '&uid='.$uid); ?>
                 </th>
             </tr>
             </tbody>
