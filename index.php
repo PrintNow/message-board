@@ -14,7 +14,7 @@ $page = intval(get('page', 1));
  * 如果页码小于 0
  * 则返回首页
  */
-if($page < 1){
+if ($page < 1) {
     header("Location: index.php");
     die;
 }
@@ -24,13 +24,13 @@ $uidTmp = [];
 $cTmp = [];//储存帖子
 
 //页码*每页显示多少数据      每页显示多少数据
-$sql = sprintf("SELECT * FROM `comments` ORDER BY send_time DESC LIMIT %d,%d", ($page-1)*20, 20);
+$sql = sprintf("SELECT * FROM `comments` ORDER BY send_time DESC LIMIT %d,%d", ($page - 1) * 20, 20);
 $res = $DB->query($sql);
 
 //最大页码数量
-$max_page = ceil($res->num_rows/20);
+$max_page = ceil($res->num_rows / 20);
 
-if($res){
+if ($res) {
     while ($row = $res->fetch_assoc()) {
         $uidTmp[] = $row['uid'];
         $cTmp[] = $row;
@@ -43,7 +43,7 @@ $uidTmp = join(",", $uidTmp);
 
 //使用 WHERE IN 语法批量查询用户信息
 $res = $DB->query("SELECT uid,nickname,summary,sex,qq,email FROM users WHERE uid IN({$uidTmp})");
-if($res){
+if ($res) {
     while ($row = $res->fetch_assoc()) {
         $uTmp[$row['uid']] = $row;
     }
@@ -82,27 +82,32 @@ if($res){
                 <li class="active">
                     <a href="./"><span class="glyphicon glyphicon-home" aria-hidden="true"></span> 首页</a>
                 </li>
-                <li>
-                    <a href="./login.php"><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> 登录</a>
-                </li>
-                <li>
-                    <a href="./reg.php"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> 免费注册</a>
-                </li>
 
-                <li class="dropdown">
-                    <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" role="button"
-                       aria-haspopup="true"
-                       aria-expanded="false"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> 初文
-                        <span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="javascript:void(0)">个人资料</a></li>
-                        <li><a href="javascript:void(0)">发布的留言</a></li>
-                        <li role="separator" class="divider"></li>
-                        <li><a href="javascript:void(0)">退出登录</a></li>
-                        <li role="separator" class="divider"></li>
-                        <li><a href="javascript:void(0)">后台管理</a></li>
-                    </ul>
-                </li>
+                <?php if ($isLogin): ?>
+                    <li class="dropdown">
+                        <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                           aria-haspopup="true"
+                           aria-expanded="false"><span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                            <?php echo $uINFO['nickname']; ?>
+                            <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="userinfo.php?uid=<?php echo 10000 + intval($uINFO['uid']) ?>">个人资料</a></li>
+                            <li><a href="javascript:void(0)">发布的留言</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li><a href="javascript:logout()">退出登录</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li><a href="javascript:void(0)">后台管理</a></li>
+                        </ul>
+                    </li>
+                <?php else: ?>
+                    <li>
+                        <a href="./login.php"><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> 登录</a>
+                    </li>
+                    <li>
+                        <a href="./reg.php"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> 免费注册</a>
+                    </li>
+                <?php endif; ?>
+
             </ul>
         </div>
     </div>
@@ -120,16 +125,17 @@ if($res){
                 </div>
                 <div class="col-xs-8">
                     <button name="submitBtn" data-loading-text="发表留言中..."
-                            type="submit" class="btn btn-primary btn-lg btn-block">发表留言</button>
+                            type="submit" class="btn btn-primary btn-lg btn-block">发表留言
+                    </button>
                 </div>
             </div>
         </div>
     </form>
 
     <?php foreach ($cTmp as $v): ?>
-        <div id="<?php echo $v['cid']+10000; ?>" class="media">
+        <div id="<?php echo $v['cid'] + 10000; ?>" class="media">
             <div class="media-left">
-                <a target="_blank" href="./userinfo.php?uid=<?php echo $v['uid']+10000; ?>">
+                <a target="_blank" href="./userinfo.php?uid=<?php echo $v['uid'] + 10000; ?>">
                     <img class="media-object img-circle" title="点击查看用户资料"
                          src="https://q1.qlogo.cn/g?b=qq&nk=<?php echo $uTmp[$v['uid']]['qq']; ?>&s=640"
                          alt="<?php echo $uTmp[$v['uid']]['qq'] ?> QQ头像">
@@ -149,7 +155,7 @@ if($res){
         </div>
     <?php endforeach; ?>
 
-    <?php echo multipage($max_page, $page+1); ?>
+    <?php echo multipage($max_page, $page + 1); ?>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
