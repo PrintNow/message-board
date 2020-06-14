@@ -171,38 +171,40 @@ if ($uid < 10001) {
         </div>
     </div>
 
-    <div class="panel panel-info">
-        <div class="panel-heading">
-            <h3 class="panel-title">发布的留言 <small class="text-center">总数：<?php echo $count; ?>条</small></h3>
-        </div>
-        <table class="table table-hover">
-            <thead>
-            <tr>
-                <th>#</th>
-                <th>留言内容</th>
-                <th style="min-width: 88px;">留言时间</th>
-                <!--                <th>操作</th>-->
-            </tr>
-            </thead>
-            <tbody>
-            <?php foreach ($comment as $row): ?>
+    <?php if (!$notFound): ?>
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <h3 class="panel-title">发布的留言 <small class="text-center">总数：<?php echo $count; ?>条</small></h3>
+            </div>
+            <table class="table table-hover">
+                <thead>
                 <tr>
-                    <th scope="row"><?php echo $row['cid'] + 10000; ?></th>
-                    <td><?php echo join("</p><p>", explode("\n", $row['contents'])); ?></td>
-                    <td><?php echo date("Y-m-d H:i", $row['send_time']); ?></td>
-                    <!--                    <td><a title="点击查看完整留言" href="view.php?cid=-->
-                    <?php //echo $row['cid']+10000; ?><!--">查看</td>-->
+                    <th>#</th>
+                    <th>留言内容</th>
+                    <th style="min-width: 88px;">留言时间</th>
+                    <!--                <th>操作</th>-->
                 </tr>
-            <?php endforeach; ?>
+                </thead>
+                <tbody>
+                <?php foreach ($comment as $row): ?>
+                    <tr>
+                        <th scope="row"><?php echo $row['cid'] + 10000; ?></th>
+                        <td><?php echo join("</p><p>", explode("\n", $row['contents'])); ?></td>
+                        <td><?php echo date("Y-m-d H:i", $row['send_time']); ?></td>
+                        <!--                    <td><a title="点击查看完整留言" href="view.php?cid=-->
+                        <?php //echo $row['cid']+10000; ?><!--">查看</td>-->
+                    </tr>
+                <?php endforeach; ?>
 
-            <tr>
-                <th colspan="3">
-                    <?php echo multipage($max_page, $page + 1, '&uid=' . $uid); ?>
-                </th>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+                <tr>
+                    <th colspan="3">
+                        <?php echo multipage($max_page, $page + 1, '&uid=' . $uid); ?>
+                    </th>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    <?php endif; ?>
 
 
 </div>
