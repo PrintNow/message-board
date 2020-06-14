@@ -113,7 +113,7 @@ if ($res) {
     </div>
 </nav>
 
-<div class="container col-md-6 col-md-offset-3" style="padding-top: 72px;">
+<div class="container col-md-8 col-md-offset-2" style="padding-top: 72px;">
     <form class="form-horizontal" onsubmit="return submitMessage(this)">
         <textarea class="form-control" rows="6" name="content" required="required"
                   placeholder="*请输入留言内容" title="请先登录后操作"></textarea>
