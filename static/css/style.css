@@ -1,0 +1,53 @@
+body {
+    /*background: url("./img/zhuan.png");*/
+}
+
+.media .media-body{
+    border-bottom: 1px solid #e4e4e4;
+}
+
+/*留言者头像*/
+.media .media-object {
+    width: 64px;
+    height: 64px;
+}
+
+.media-body .secondary {
+    font-size: 1.4rem;
+    width: 100%;
+}
+
+/*留言者*/
+.media-body .nickname {
+    font-weight: bold;
+    font-size: 1.8rem;
+}
+
+/*留言者个性签名*/
+.media-body .summary {
+    padding-left: 8px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+.media-body > p {
+    text-indent: 2.8rem;
+}
+
+
+/*辅助样式*/
+.flex-center {
+    display: flex;
+    justify-content: center;
+}
+
+th[class=pagination] {
+    padding: 0 16px;
+    padding-top: 6px;
+}
+
+table .pagination {
+    margin: 0;
+}
