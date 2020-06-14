@@ -8,6 +8,7 @@
 
 header("Content-type:text/html;charset=utf-8");
 
+define("KEY", "2xr5gwRN8At4iVqi@DWDVWrJ*yfW8Cjo");
 
 //定义 根目录路径 常量
 define("ROOT_DIR", dirname(__DIR__));
@@ -33,3 +34,37 @@ $DB = new mysqli($DBC['db_host'], $DBC['db_user'], $DBC['db_password'], $DBC['db
 
 //设置 mysqli 字符编码
 $DB->set_charset("utf8");
+
+//登陆状态 false：未登陆
+$isLogin = false;
+
+//如果存在 cookie
+if(!empty($_COOKIE['mbToken'])){
+    @list($uid, $expireTime, $token) = explode("|-|", authcode($_COOKIE['mbToken'], "DECODE", KEY));
+
+    //Token 过期了，需要重新登录
+    if(intval($expireTime) <= time()){
+        $isLogin = false;
+
+        die("Token 过期了，需要重新登录");
+    }else{
+        $res = $DB->query(sprintf("SELECT uid,nickname,password FROM users WHERE uid=%d", intval($uid)-10000));
+        $uINFO = $res->fetch_assoc();
+        $res->free_result();
+
+        if($token !== crypt($uINFO['password'] . $expireTime, '$1$rasmusle$')){
+            $isLogin = false;//鉴权失败，需要重新登录
+
+            die("鉴权失败，需要重新登录");
+        }
+
+        $isLogin = true;
+    }
+
+    if(!$isLogin){
+        //使 cookie 过期
+        setcookie("mbToken", "", time()-86400);
+    }
+
+    unset($uid, $expireTime, $token, $res);//清理无用变量
+}
