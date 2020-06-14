@@ -7,6 +7,92 @@ $(function () {
     // $.toastr.error('失败', {position: 'top-right'});
 })
 
+/**
+ * 退出登录
+ */
+function logout(){
+    console.info("退出登录");
+
+    document.cookie = "mbToken=;expires=0";
+
+    $.toastr.success('退出登陆成功！', {
+        position: 'top-right',
+        time: 1800,
+        size: 'lg',
+        callback: function(){
+            location.reload();//刷新页面
+        }
+    });
+}
+
+
+/**
+ * 登陆账号
+ * @param dom
+ * @returns {boolean}
+ */
+function loginAccount(dom) {
+    var account = dom.account.value,
+        password = dom.password.value,
+        loginBtn = dom.regBtn;
+
+    if(account.length < 1){
+        $.toastr.warning('账号长度必须大于1', {
+            position: 'top-right',
+            time: 4000,
+            size: 'lg'
+        });
+        return false;
+    }
+
+    $.ajax({
+        url: 'login.php?action=login',
+        method: 'POST',
+        dataType: 'json',
+        data: {
+            account: account,
+            password: password
+        },
+        beforeSend: function () {
+            $(loginBtn).button('loading');//将按钮改成 加载状态并且禁用点击
+        },
+        complete: function () {
+            $(loginBtn).button('reset');
+        },
+        success: function (res) {
+            if (res.msg === undefined) {
+                res.msg = '服务器暂时出现未知的错误，请稍后再试！';
+            }
+
+            if (res.code === 0) {
+                $.toastr.success('账号登录成功！', {
+                    position: 'top-right',
+                    time: 1800,
+                    size: 'lg',
+                    callback: function(){
+                        window.location.href = "index.php";
+                    }
+                });
+            } else {
+                $.toastr.warning('账号登录失败！原因：' + res.msg, {
+                    position: 'top-right',
+                    time: 7000,
+                    size: 'lg'
+                });
+            }
+        },
+        error: function (e) {
+            $.toastr.error('账号登录失败！<br/>原因：服务器暂时出现未知的错误 或者 你的网络出现问题。请稍后再试！', {
+                position: 'top-right',
+                time: 8000,
+                size: 'lg'
+            });
+        }
+    })
+
+    return false;
+}
+
 
 
 /**
