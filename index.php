@@ -24,7 +24,7 @@ $uidTmp = [];
 $cTmp = [];//储存帖子
 
 //页码*每页显示多少数据      每页显示多少数据
-$sql = sprintf("SELECT * FROM `comments` LIMIT %d,%d", ($page-1)*20, 20);
+$sql = sprintf("SELECT * FROM `comments` ORDER BY send_time DESC LIMIT %d,%d", ($page-1)*20, 20);
 $res = $DB->query($sql);
 
 //最大页码数量
@@ -127,7 +127,7 @@ if($res){
     <?php foreach ($cTmp as $v): ?>
         <div class="media">
             <div class="media-left">
-                <a href="./userinfo.php?uid=<?php echo $v['uid']; ?>">
+                <a target="_blank" href="./userinfo.php?uid=<?php echo $v['uid']+10000; ?>">
                     <img class="media-object img-circle"
                          src="https://q1.qlogo.cn/g?b=qq&nk=<?php echo $uTmp[$v['uid']]['qq']; ?>&s=640"
                          alt="<?php echo $uTmp[$v['uid']]['qq'] ?> QQ头像">
@@ -137,7 +137,8 @@ if($res){
                 <div class="media-heading">
                     <div class="nickname"><?php echo $uTmp[$v['uid']]['nickname']; ?></div>
                     <div class="secondary">
-                        <span class="time"><?php echo formatTime($v['post_time']); ?></span>
+                        <span class="time" title="<?php echo date("Y-m-d H:i", $v['send_time']); ?>"
+                              datetime="<?php echo date('c', $v['send_time']); ?>"><?php echo formatTime($v['send_time']); ?></span>
                         <span class="summary"><?php echo $uTmp[$v['uid']]['summary']; ?></span>
                     </div>
                 </div>
