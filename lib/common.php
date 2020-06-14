@@ -48,7 +48,8 @@ if(!empty($_COOKIE['mbToken'])){
 
         die("Token 过期了，需要重新登录");
     }else{
-        $res = $DB->query(sprintf("SELECT uid,nickname,password FROM users WHERE uid=%d", intval($uid)-10000));
+        $res = $DB->query(sprintf("SELECT uid,user_right,nickname,password FROM users WHERE uid=%d",
+            intval($uid)-10000));
         $uINFO = $res->fetch_assoc();
         $res->free_result();
 
