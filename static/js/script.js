@@ -7,6 +7,26 @@ $(function () {
     // $.toastr.error('失败', {position: 'top-right'});
 })
 
+
+
+$('#editUser').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget)
+
+    var nickname = button.data('nickname')
+    var sex = button.data('sex')
+    var qq = button.data('qq')
+    var email = button.data('email')
+
+    var modal = $(this)
+
+    modal.find('.modal-title').text('编辑用户资料：' + nickname)
+    modal.find('.modal-body #nickname').val(nickname)
+    modal.find('.modal-body #sex').val(sex)
+    modal.find('.modal-body #qq').val(qq)
+    modal.find('.modal-body #email').val(email)
+})
+
+
 /**
  * 退出登录
  */
