@@ -31,6 +31,13 @@ body {
     text-overflow: ellipsis;
 }
 
+/*留言操作*/
+.media-body .operate {
+    display: flex;
+    justify-content: flex-end;
+    align-content: end;
+}
+
 
 .media-body > p {
     text-indent: 2.8rem;

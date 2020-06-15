@@ -8,7 +8,7 @@
 
 include_once __DIR__ . "/lib/common.php";
 
-$page = intval(get('page', 1));
+$page = get('page', 1);
 
 /**
  * 如果页码小于 0
@@ -23,12 +23,12 @@ if ($page < 1) {
 $uidTmp = [];
 $cTmp = [];//储存帖子
 
-//页码*每页显示多少数据      每页显示多少数据
-$sql = sprintf("SELECT * FROM `comments` ORDER BY send_time DESC LIMIT %d,%d", ($page - 1) * 20, 20);
-$res = $DB->query($sql);
-
 //最大页码数量
-$max_page = ceil($res->num_rows / 20);
+$max_page = ceil($DB->query("SELECT COUNT(*) AS c FROM `comments`")->fetch_assoc()['c'] / 10);
+
+//页码*每页显示多少数据      每页显示多少数据
+$sql = sprintf("SELECT * FROM `comments` ORDER BY send_time DESC LIMIT %d,%d", (intval($page) - 1) * 10, 10);
+$res = $DB->query($sql);
 
 if ($res) {
     while ($row = $res->fetch_assoc()) {
@@ -92,7 +92,7 @@ if ($res) {
                             <span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             <li><a href="userinfo.php?uid=<?php echo 10000 + intval($uINFO['uid']) ?>">个人资料</a></li>
-                            <li><a href="javascript:void(0)">发布的留言</a></li>
+                            <li><a href="userinfo.php?uid=<?php echo 10000 + intval($uINFO['uid']) ?>#sendM">发布的留言</a></li>
                             <li role="separator" class="divider"></li>
                             <li><a href="javascript:logout()">退出登录</a></li>
                             <?php if (intval($uINFO['user_right']) === 1): ?>
@@ -137,7 +137,7 @@ if ($res) {
     <?php foreach ($cTmp as $v): ?>
         <div id="<?php echo $v['cid'] + 10000; ?>" class="media">
             <div class="media-left">
-                <a target="_blank" href="./userinfo.php?uid=<?php echo $v['uid'] + 10000; ?>">
+                <a target="_blank" href="userinfo.php?uid=<?php echo $v['uid'] + 10000; ?>">
                     <img class="media-object img-circle" title="点击查看用户资料"
                          src="https://q1.qlogo.cn/g?b=qq&nk=<?php echo $uTmp[$v['uid']]['qq']; ?>&s=640"
                          alt="<?php echo $uTmp[$v['uid']]['qq'] ?> QQ头像">
@@ -153,11 +153,19 @@ if ($res) {
                     </div>
                 </div>
                 <p><?php echo join("</p><p>", explode("\n", $v['contents'])); ?></p>
+
+                <?php if(intval($uINFO['uid']) === intval($v['uid'])): ?>
+                <div class="operate">
+                    <a href="edit.php?cid=<?php echo $v['cid'] + 10000; ?>">编辑</a>
+                    <span style="padding: 0 5px"></span>
+                    <a href="javascript:deleteM(<?php echo $v['cid'] + 10000; ?>)">删除</a>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
     <?php endforeach; ?>
 
-    <?php echo multipage($max_page, $page + 1); ?>
+    <?php echo multipage(intval($max_page), intval($page)); ?>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>

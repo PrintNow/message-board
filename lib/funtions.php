@@ -155,7 +155,7 @@ function multipage($maxpage = 5, $page = 1, $para = '')
 
         $multipage .= ($page < $maxpage ? '<li><a href="?page=' . ($page + 1) . $para . '" >&raquo;</a></li>' : '') .
             ($to < $maxpage ? '<li><a href="?page=' . $maxpage . $para . '" class="last" >...' . $maxpage . '</a></li>' : '');
-        $multipage .= ' <li><a href="#" ><input type="text" size="3"  οnkeydοwn="if(event.keyCode==13) {self.window.location=\'?page=\'+this.value+\'' . $para . '\'; return false;}" ></a></li>';
+        $multipage .= ' <li><a><input type="text" size="3"  οnkeydοwn="if(event.keyCode===13) {self.window.location=\'?page=\'+this.value+\'' . $para . '\'; return false;}" ></a></li>';
 
 
         $multipage = $multipage ? '<ul class="pagination">' . $multipage . '</ul>' : '';

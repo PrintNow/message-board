@@ -12,7 +12,8 @@ $uid = intval(get('uid', 0));
 
 $notFound = true;//是否为未找到该用户，true：是，返回404页面
 $max_page = 1;//最大页码
-$page = intval(get('page', 1));//当前页码
+
+$page = intval(get('page', '1'));//当前页码
 
 if ($uid < 10001) {
     header("HTTP/1.0 404 Not Found");
@@ -91,7 +92,7 @@ if ($uid < 10001) {
                         <ul class="dropdown-menu">
                             <li class="active"><a href="userinfo.php?uid=<?php echo 10000 + intval($uINFO['uid']) ?>">个人资料</a>
                             </li>
-                            <li><a href="javascript:void(0)">发布的留言</a></li>
+                            <li><a href="userinfo.php?uid=<?php echo 10000 + intval($uINFO['uid']) ?>#sendM">发布的留言</a></li>
                             <li role="separator" class="divider"></li>
                             <li><a href="javascript:logout()">退出登录</a></li>
                             <?php if (intval($uINFO['user_right']) === 1): ?>
@@ -174,7 +175,7 @@ if ($uid < 10001) {
     </div>
 
     <?php if (!$notFound): ?>
-        <div class="panel panel-info">
+        <div id="sendM" class="panel panel-info">
             <div class="panel-heading">
                 <h3 class="panel-title">发布的留言 <small class="text-center">总数：<?php echo $count; ?>条</small></h3>
             </div>
@@ -203,7 +204,7 @@ if ($uid < 10001) {
 
                 <tr>
                     <th colspan="3">
-                        <?php echo multipage($max_page, $page + 1, '&uid=' . $uid); ?>
+                        <?php echo multipage(intval($max_page), intval($page), '&uid=' . $uid); ?>
                     </th>
                 </tr>
                 </tbody>
