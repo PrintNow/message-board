@@ -5,6 +5,57 @@ $(function () {
 
 
 /**
+ * 删除发布的留言
+ * @param cid
+ * @returns {boolean}
+ */
+function deleteM(cid) {
+    var confirmD = confirm("是否确认删除此留言（CID: "+cid+"）？\n此操作不可逆，请谨慎操作！");
+    if (confirmD === false) {
+        return false;
+    }
+
+    $.ajax({
+        url: 'api.php?do=delete',
+        method: 'POST',
+        dataType: 'json',
+        data: {
+            cid: cid
+        },
+        success: function (res) {
+            if (res.msg === undefined) {
+                res.msg = '服务器暂时出现错误，请稍后再试！';
+            }
+
+            if (res.code === 0) {
+                $.toastr.success('删除留言（CID: ' + cid + '）成功！即将刷新页面', {
+                    position: 'top-right',
+                    time: 1800,
+                    size: 'lg',
+                    callback: function () {
+                        location.reload();//刷新页面
+                    }
+                });
+                $("tr[data-cid="+cid+"]").remove();
+            } else {
+                $.toastr.warning('删除留言失败，原因：' + res.msg, {
+                    time: 6000,
+                    position: 'top-right'
+                });
+            }
+        },
+        error: function () {
+            $.toastr.error('删除留言失败，请检查你的网络或服务器暂时出现故障，请稍后再试！', {
+                time: 8000,
+                position: 'top-right'
+            });
+        }
+    });
+
+    return true;
+}
+
+/**
  * 删除用户
  * @param uid
  * @returns {boolean}
@@ -21,9 +72,6 @@ function deleteUser(uid) {
         dataType: 'json',
         data: {
             uid: uid
-        },
-        complete: function () {
-            $btn.button('reset')//关闭按钮加载
         },
         success: function (res) {
             if (res.msg === undefined) {

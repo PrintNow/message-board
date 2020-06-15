@@ -189,14 +189,14 @@ if ($uid < 10001) {
                 </thead>
                 <tbody>
                 <?php foreach ($comment as $row): ?>
-                    <tr>
+                    <tr data-cid="<?php echo $row['cid'] + 10000; ?>">
                         <th scope="row"><?php echo $row['cid'] + 10000; ?></th>
                         <td><?php echo join("</p><p>", explode("\n", $row['contents'])); ?></td>
                         <td><?php echo date("Y-m-d H:i", $row['send_time']); ?></td>
                         <td>
                             <a href="javascript:deleteM(<?php echo $row['cid']; ?>)">编辑</a>
                             <span style="padding:8px"></span>
-                            <a href="javascript:deleteM(<?php echo $row['cid']; ?>)">删除</a>
+                            <a href="javascript:deleteM(<?php echo $row['cid']+10000; ?>)">删除</a>
                         </td>
                     </tr>
                 <?php endforeach; ?>
