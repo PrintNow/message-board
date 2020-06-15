@@ -49,7 +49,7 @@ if (isset($_SERVER['REQUEST_METHOD']) && strtoupper($_SERVER['REQUEST_METHOD']) 
         $encode = authcode($code, 'ENCODE', KEY);
 
         //发送 cookie
-        setcookie("mbToken", $encode, $expireTime);
+        setcookie("mbToken", $encode, $expireTime, "/");
 
         die(echoApiData(0, '登录账号成功！'));
     }
