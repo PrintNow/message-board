@@ -8,13 +8,65 @@
 
 include_once dirname(__DIR__) . "/lib/common.php";
 
-if($isLogin){
-    if(intval($uINFO['user_right']) === 1){
+if (in_array(($action = get('action')), ['edit', 'delete'])) {
+    if (!$isLogin) {
+        die(echoApiData(4, "请先登陆后再进行操作！"));
+    }
+
+    if (intval($uINFO['user_right']) !== 1) {
+        die(echoApiData(3, "你没有超级管理员权限，无法进行操作！"));
+    }
+
+    $uid = post('uid');
+    $uid = intval($uid)-10000;
+
+    $nickname = post('nickname');
+    $password = post('password', '');
+    $sex = post('sex');
+    $qq = post('qq');
+    $email = post('email');
+
+    $res = $DB->query(sprintf("SELECT uid,nickname,password,sex,qq,email FROM users WHERE uid=%d", $uid));
+    if (($row = $res->fetch_assoc()) === null) {
+        die(echoApiData(5, "不存在该用户，请刷新页面！"));
+    }
+
+    //删除操作
+    if($action === 'delete'){
+        $res = $DB->query(sprintf("DELETE FROM users WHERE uid=%d", $uid));
+        if($res){
+            die(echoApiData(0, "删除用户成功！"));
+        }
+
+        die(echoApiData(-1, "删除用户失败，请稍后再试！"));
+    }
+
+    if($password === '' || $password === $res['password']){
+        $password = '';
+    }else{
+        $password = sprintf(",password='%s' ", $password);
+    }
+
+    //由于超级管理员页面仅拥有管理员权限才能修改
+    //所以不考虑 SQL注入问题
+    $update = $DB->query($sql=sprintf("UPDATE users SET nickname='%s' {$password}, sex=%d, qq=%d, email='%s' WHERE uid=%d",
+        $nickname, $sex, $qq, $email, $uid
+    ));
+
+    if($update){
+        die(echoApiData(0, "编辑用户资料成功！"));
+    }
+
+    die(echoApiData(-1, "编辑用户资料失败，请稍后再试！"));
+}
+
+if ($isLogin) {
+    if (intval($uINFO['user_right']) === 1) {
         $sql = sprintf("SELECT uid+10000 AS uid,nickname,sex,email,qq,reg_ip,reg_time FROM users ORDER BY reg_time ASC LIMIT 20");
         $res = $DB->query($sql);
 
         $row = [];
-        if($res){
+        if ($res) {
             $row = $res->fetch_all(MYSQLI_ASSOC);
         }
     }
@@ -68,8 +120,10 @@ if($isLogin){
                             <li><a href="javascript:void(0)">发布的留言</a></li>
                             <li role="separator" class="divider"></li>
                             <li><a href="javascript:logout()">退出登录</a></li>
-                            <li role="separator" class="divider"></li>
-                            <li><a href="javascript:void(0)">后台管理</a></li>
+                            <?php if(intval($uINFO['user_right']) === 1): ?>
+                                <li role="separator" class="divider"></li>
+                                <li><a href="admin/index.php">后台管理</a></li>
+                            <?php endif; ?>
                         </ul>
                     </li>
                 <?php else: ?>
@@ -98,6 +152,10 @@ if($isLogin){
             <p class="text-right"><a class="btn btn-danger btn-lg" href="../index.php" role="button">返回首页</a></p>
         </div>
     <?php else: ?>
+        <div class="alert alert-warning" role="alert">
+            <p>请注意，编辑、删除用户后，需要刷新页面才能查看最新结果</p>
+            <p style="font-weight: bold">PS：编辑用户成功后会自动刷新页面，但是删除用户成功后不会自动刷新</p>
+        </div>
         <table class="table table-hover">
             <thead>
             <tr>
@@ -114,7 +172,7 @@ if($isLogin){
             <tbody>
 
             <?php foreach ($row as $v): ?>
-                <tr>
+                <tr data-uid="<?php echo $v['uid']; ?>">
                     <th scope="row"><?php echo $v['uid']; ?></th>
                     <td><?php echo $v['nickname']; ?></td>
                     <td><?php echo ['未知', '男', '女'][$v['sex']]; ?></td>
@@ -124,6 +182,7 @@ if($isLogin){
                     <td><?php echo date("Y-m-d H:i:s", $v['reg_time']); ?></td>
                     <td>
                         <a data-toggle="modal" data-target="#editUser"
+                           data-uid="<?php echo $v['uid']; ?>"
                            data-nickname="<?php echo $v['nickname']; ?>"
                            data-sex="<?php echo $v['sex']; ?>"
                            data-qq="<?php echo $v['qq']; ?>"
@@ -141,17 +200,21 @@ if($isLogin){
 </div>
 
 
-
 <div class="modal fade" id="editUser" tabindex="-1" data-backdrop="static" aria-hidden="true"
      role="dialog" aria-labelledby="editUser">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
                 <h4 class="modal-title" id="editUserLabel">编辑用户资料</h4>
             </div>
             <div class="modal-body">
                 <form>
+                    <div class="form-group">
+                        <label for="recipient-name" class="control-label">UID:</label>
+                        <input type="text" class="form-control" id="uid" disabled>
+                    </div>
                     <div class="form-group">
                         <label for="recipient-name" class="control-label">用户名:</label>
                         <input type="text" class="form-control" id="nickname">
@@ -164,7 +227,7 @@ if($isLogin){
                     <div class="form-group">
                         <label for="recipient-name" class="control-label">性别:</label>
                         <select id="sex" class="form-control">
-                            <option value="0">请选择性别</option>
+                            <option value="0" disabled selected>请选择性别</option>
                             <option value="1">男</option>
                             <option value="2">女</option>
                         </select>
@@ -181,7 +244,9 @@ if($isLogin){
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                <button type="button" class="btn btn-primary">确认编辑</button>
+                <button type="button" class="btn btn-primary"
+                        data-loading-text="编辑中..." id="confirm-edit">确认编辑
+                </button>
             </div>
         </div>
     </div>

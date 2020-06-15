@@ -1,36 +1,142 @@
 $(function () {
-    // $.toastr.config({
-    //     // 设置默认关闭时间为5秒
-    //     time: 2500
-    // });
     // $.toastr.success('成功', {position: 'top-right'});
     // $.toastr.error('失败', {position: 'top-right'});
 })
 
 
+/**
+ * 删除用户
+ * @param uid
+ * @returns {boolean}
+ */
+function deleteUser(uid) {
+    var confirmD = confirm("是否确认删除用户（UID: "+uid+"）？\n此操作不可逆，请谨慎操作！");
+    if (confirmD === false) {
+        return false;
+    }
 
+    $.ajax({
+        url: 'admin/index.php?action=delete',
+        method: 'POST',
+        dataType: 'json',
+        data: {
+            uid: uid
+        },
+        complete: function () {
+            $btn.button('reset')//关闭按钮加载
+        },
+        success: function (res) {
+            if (res.msg === undefined) {
+                res.msg = '服务器暂时出现错误，请稍后再试！';
+            }
+
+            if (res.code === 0) {
+                $.toastr.success('删除用户（UID: ' + uid + '）成功！', {
+                    position: 'top-right',
+                    time: 2000,
+                    size: 'lg',
+                    callback: function () {
+                        // location.reload();//刷新页面
+                    }
+                });
+                $("tr[data-uid="+uid+"]").remove();
+            } else {
+                $.toastr.warning('删除用户失败，原因：' + res.msg, {
+                    time: 6000,
+                    position: 'top-right'
+                });
+            }
+        },
+        error: function () {
+            $.toastr.error('删除用户失败，请检查你的网络或服务器暂时出现故障，请稍后再试！', {
+                time: 8000,
+                position: 'top-right'
+            });
+        }
+    });
+}
+
+
+/**
+ * 监听“编辑用户”事件
+ */
 $('#editUser').on('show.bs.modal', function (event) {
-    var button = $(event.relatedTarget)
-
-    var nickname = button.data('nickname')
-    var sex = button.data('sex')
-    var qq = button.data('qq')
-    var email = button.data('email')
+    var button = $(event.relatedTarget),
+        uid = button.data('uid'),
+        nickname = button.data('nickname'),
+        sex = button.data('sex'),
+        qq = button.data('qq'),
+        email = button.data('email')
 
     var modal = $(this)
-
     modal.find('.modal-title').text('编辑用户资料：' + nickname)
+    modal.find('.modal-body #uid').val(uid)
     modal.find('.modal-body #nickname').val(nickname)
     modal.find('.modal-body #sex').val(sex)
     modal.find('.modal-body #qq').val(qq)
     modal.find('.modal-body #email').val(email)
+
+
+    $(".modal-footer #confirm-edit").on("click", function () {
+        var $btn = $(this).button('loading')//将按钮显示为 编辑中
+        var that = this;
+
+        $.ajax({
+            url: 'admin/index.php?action=edit',
+            method: 'POST',
+            dataType: 'json',
+            data: {
+                uid: uid,
+                nickname: $(".modal-body #nickname").val(),
+                password: $(".modal-body #password").val(),
+                sex: $(".modal-body #sex").val(),
+                qq: $(".modal-body #qq").val(),
+                email: $(".modal-body #email").val()
+            },
+            complete: function () {
+                $btn.button('reset')//关闭按钮加载
+            },
+            success: function (res) {
+                if (res.msg === undefined) {
+                    res.msg = '服务器暂时出现错误，请稍后再试！';
+                }
+
+                if (res.code === 0) {
+                    $.toastr.success('编辑用户资料（UID: ' + uid + '）成功！即将刷新页面', {
+                        position: 'top-right',
+                        time: 2000,
+                        size: 'lg',
+                        callback: function () {
+                            location.reload();//刷新页面
+                        }
+                    });
+                    $(that).off("click");//解除click绑定
+                    $(modal).modal('hide');//关闭模态框
+                } else {
+                    $.toastr.warning('编辑用户资料失败，原因：' + res.msg, {
+                        time: 6000,
+                        position: 'top-right'
+                    });
+                }
+            },
+            error: function () {
+                $.toastr.error('编辑用户资料失败，请检查你的网络或服务器暂时出现故障，请稍后再试！', {
+                    time: 8000,
+                    position: 'top-right'
+                });
+            }
+        });
+    });
+}).on('hide.bs.modal', function () {
+    console.log("关闭模态框");
+    $(this).off("click");//解除click绑定
 })
 
 
 /**
  * 退出登录
  */
-function logout(){
+function logout() {
     console.info("退出登录");
 
     document.cookie = "mbToken=;expires=0";
@@ -39,7 +145,7 @@ function logout(){
         position: 'top-right',
         time: 1800,
         size: 'lg',
-        callback: function(){
+        callback: function () {
             location.reload();//刷新页面
         }
     });
@@ -56,7 +162,7 @@ function loginAccount(dom) {
         password = dom.password.value,
         loginBtn = dom.regBtn;
 
-    if(account.length < 1){
+    if (account.length < 1) {
         $.toastr.warning('账号长度必须大于1', {
             position: 'top-right',
             time: 4000,
@@ -89,7 +195,7 @@ function loginAccount(dom) {
                     position: 'top-right',
                     time: 1800,
                     size: 'lg',
-                    callback: function(){
+                    callback: function () {
                         window.location.href = "index.php";
                     }
                 });
@@ -114,7 +220,6 @@ function loginAccount(dom) {
 }
 
 
-
 /**
  * 注册账号
  * @param dom           form 的 DOM
@@ -128,7 +233,7 @@ function regAccount(dom) {
         sex = dom.sex.value,
         regBtn = dom.regBtn;
 
-    if(nickname.length < 1 || nickname.length > 21){
+    if (nickname.length < 1 || nickname.length > 21) {
         $.toastr.warning('用户名长度必须 大于1 小于21', {
             position: 'top-right',
             time: 4000,
@@ -137,7 +242,7 @@ function regAccount(dom) {
         return false;
     }
 
-    if(password.length < 7 || password.length > 16){
+    if (password.length < 7 || password.length > 16) {
         $.toastr.warning('密码长度必须 大于1 小于16', {
             position: 'top-right',
             time: 4000,
@@ -146,7 +251,7 @@ function regAccount(dom) {
         return false;
     }
 
-    if(qq.length < 5){
+    if (qq.length < 5) {
         $.toastr.warning('QQ账号长度必须 大于5', {
             position: 'top-right',
             time: 4000,
@@ -182,7 +287,7 @@ function regAccount(dom) {
                     position: 'top-right',
                     time: 1800,
                     size: 'lg',
-                    callback: function(){
+                    callback: function () {
                         window.location.href = "login.php";
                     }
                 });
@@ -246,7 +351,7 @@ function submitMessage(dom) {
                     position: 'top-right',
                     time: 1800,
                     size: 'lg',
-                    callback: function(){
+                    callback: function () {
                         location.reload();//刷新页面
                     }
                 });
