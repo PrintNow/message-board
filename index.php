@@ -154,12 +154,14 @@ if ($res) {
                 </div>
                 <p><?php echo join("</p><p>", explode("\n", $v['contents'])); ?></p>
 
-                <?php if(intval($uINFO['uid']) === intval($v['uid'])): ?>
-                <div class="operate">
-                    <a href="edit.php?cid=<?php echo $v['cid'] + 10000; ?>">编辑</a>
-                    <span style="padding: 0 5px"></span>
-                    <a href="javascript:deleteM(<?php echo $v['cid'] + 10000; ?>)">删除</a>
-                </div>
+                <?php if($isLogin): ?>
+                    <?php if(intval($uINFO['uid']) === intval($v['uid'])): ?>
+                        <div class="operate">
+                            <a href="edit.php?cid=<?php echo $v['cid'] + 10000; ?>">编辑</a>
+                            <span style="padding: 0 5px"></span>
+                            <a href="javascript:deleteM(<?php echo $v['cid'] + 10000; ?>)">删除</a>
+                        </div>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
         </div>
