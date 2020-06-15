@@ -95,8 +95,10 @@ if ($res) {
                             <li><a href="javascript:void(0)">发布的留言</a></li>
                             <li role="separator" class="divider"></li>
                             <li><a href="javascript:logout()">退出登录</a></li>
-                            <li role="separator" class="divider"></li>
-                            <li><a href="javascript:void(0)">后台管理</a></li>
+                            <?php if (intval($uINFO['user_right']) === 1): ?>
+                                <li role="separator" class="divider"></li>
+                                <li><a href="admin/index.php">后台管理</a></li>
+                            <?php endif; ?>
                         </ul>
                     </li>
                 <?php else: ?>

@@ -94,8 +94,10 @@ if ($uid < 10001) {
                             <li><a href="javascript:void(0)">发布的留言</a></li>
                             <li role="separator" class="divider"></li>
                             <li><a href="javascript:logout()">退出登录</a></li>
-                            <li role="separator" class="divider"></li>
-                            <li><a href="javascript:void(0)">后台管理</a></li>
+                            <?php if (intval($uINFO['user_right']) === 1): ?>
+                                <li role="separator" class="divider"></li>
+                                <li><a href="admin/index.php">后台管理</a></li>
+                            <?php endif; ?>
                         </ul>
                     </li>
                 <?php else: ?>
@@ -182,7 +184,7 @@ if ($uid < 10001) {
                     <th>#</th>
                     <th>留言内容</th>
                     <th style="min-width: 88px;">留言时间</th>
-                    <!--                <th>操作</th>-->
+                    <th style="min-width: 44px;">操作</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -191,8 +193,11 @@ if ($uid < 10001) {
                         <th scope="row"><?php echo $row['cid'] + 10000; ?></th>
                         <td><?php echo join("</p><p>", explode("\n", $row['contents'])); ?></td>
                         <td><?php echo date("Y-m-d H:i", $row['send_time']); ?></td>
-                        <!--                    <td><a title="点击查看完整留言" href="view.php?cid=-->
-                        <?php //echo $row['cid']+10000; ?><!--">查看</td>-->
+                        <td>
+                            <a href="javascript:deleteM(<?php echo $row['cid']; ?>)">编辑</a>
+                            <span style="padding:8px"></span>
+                            <a href="javascript:deleteM(<?php echo $row['cid']; ?>)">删除</a>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
 
