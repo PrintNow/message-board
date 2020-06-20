@@ -41,6 +41,8 @@ if ($res) {
     die(echoApiData(0, "发表留言成功！"));
 }
 
+
+
 die(echoApiData(-1, "发表留言失败，内部服务错误"));
 
 
@@ -49,7 +51,7 @@ delete:
 $cid = post('cid', '');
 
 if (!$isLogin) {
-    die(echoApiData(3, "请先登陆账号后再进行留言！"));
+    die(echoApiData(3, "请先登陆账号后再进行删除留言！"));
 }
 
 if (empty($cid)) {
