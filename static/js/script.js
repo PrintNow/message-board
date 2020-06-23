@@ -1,7 +1,116 @@
 $(function () {
     // $.toastr.success('成功', {position: 'top-right'});
     // $.toastr.error('失败', {position: 'top-right'});
+
+    // $('#myModal').on('hide.bs.modal',
+    //     function() {
+    //         alert('嘿，我听说您喜欢模态框...');
+    //     })
 })
+
+
+/**
+ * 确认修改个人资料
+ * @param _this
+ */
+function confirmInfoEdit(_this){
+    var nickname = $("input[name=nickname]").val(),
+        summary = $("input[name=summary]").val(),
+        sex = $("select[name=sex]").val(),
+        _password = $("input[name=_password]").val(),
+        password = $("input[name=password]").val(),
+        password2 = $("input[name=password2]").val();
+
+    if(!nickname){
+        return $.toastr.warning('昵称不能为空！', {
+            time: 2000,
+            position: 'top-right',
+            size: 'lg'
+        });
+    }
+    if(!sex){
+        return $.toastr.warning('性别必须选择！', {
+            time: 2000,
+            position: 'top-right',
+            size: 'lg'
+        });
+    }
+
+    if(_password){
+        console.info("输入了原密码");
+
+        if(!password){
+            return $.toastr.warning('请设置一个新密码', {
+                time: 2000,
+                position: 'top-right',
+                size: 'lg'
+            });
+        }
+
+        if(password2 !== password){
+            return $.toastr.warning('两次输入的新密码不一致，请检查！', {
+                time: 2000,
+                position: 'top-right',
+                size: 'lg'
+            });
+        }
+    }
+
+    var $btn = $(_this).button('loading')//将按钮显示为 编辑中
+
+    $.ajax({
+        url: 'api.php?do=edit',
+        method: 'POST',
+        dataType: 'json',
+        data: {
+            nickname: nickname,
+            sex: sex,
+            summary: summary,
+            _password: _password,
+            password: password
+        },
+        complete: function () {
+            $btn.button('reset')//关闭按钮加载
+        },
+        success: function (res) {
+            if (res.msg === undefined) {
+                res.msg = '服务器暂时出现错误，请稍后再试！';
+            }
+
+            if (res.code === 0) {
+                $.toastr.success('修改个人资料成功，如果你修改了密码需要重新登陆！', {
+                    position: 'top-right',
+                    time: 1800,
+                    size: 'lg',
+                    callback: function () {
+                        location.reload();//刷新页面
+                    }
+                });
+            } else {
+                $.toastr.error('修改个人资料失败，原因：' + res.msg, {
+                    time: 6000,
+                    position: 'top-right'
+                });
+            }
+        },
+        error: function () {
+            $.toastr.error('修改个人资料失败，请检查你的网络或服务器暂时出现故障，请稍后再试！', {
+                time: 8000,
+                position: 'top-right'
+            });
+        }
+    });
+
+}
+
+
+/**
+ * 修改个人资料
+ * @param uid   用户UID
+ */
+function editUserInfo(uid){
+    $('#myModal').modal('show');//展示模态框
+}
 
 
 /**
@@ -106,6 +215,76 @@ function deleteUser(uid) {
 
 
 /**
+ * 监听“回复留言”事件
+ */
+$('#reply').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget),
+    cid = button.data('cid'),
+    name = button.data('name');
+    var $cidSe = 'tr[data-cid='+cid+']';
+    var content = $($cidSe+" td[data-type='contents']").text();//留言内容
+
+    var modal = $(this)
+    modal.find('.modal-title').text('编辑用户资料：' + nickname)
+    modal.find('.modal-body #replyUser').val(name)
+    modal.find('.modal-body #replyContent').val(content)
+    modal.find('.modal-body #replyText').val($($cidSe+" td[data-type='reply']").text())
+
+    $("#editLink").attr("href", "edit.php?cid="+(10000+parseInt(cid)));
+
+    //监听点击回复按钮
+    $(".modal-footer #confirm-reply").on("click", function () {
+        var $btn = $(this).button('loading')//将按钮显示为 编辑中
+        var that = this;
+
+        $.ajax({
+            url: 'msg.php?action=reply',
+            method: 'POST',
+            dataType: 'json',
+            data: {
+                cid: cid,
+                reply: $(".modal-body #replyText").val()//回复留言内容
+            },
+            complete: function () {
+                $btn.button('reset')//关闭按钮加载
+            },
+            success: function (res) {
+                if (res.msg === undefined) {
+                    res.msg = '服务器暂时出现错误，请稍后再试！';
+                }
+
+                if (res.code === 0) {
+                    $.toastr.success('回复成功！即将刷新页面', {
+                        position: 'top-right',
+                        time: 1500,
+                        size: 'lg',
+                        callback: function () {
+                            location.reload();//刷新页面
+                        }
+                    });
+                    $(that).off("click");//解除click绑定
+                    $(modal).modal('hide');//关闭模态框
+                } else {
+                    $.toastr.warning('回复留言失败失败，原因：' + res.msg, {
+                        time: 6000,
+                        position: 'top-right'
+                    });
+                }
+            },
+            error: function () {
+                $.toastr.error('回复留言失败失败，请检查你的网络或服务器暂时出现故障，请稍后再试！', {
+                    time: 8000,
+                    position: 'top-right'
+                });
+            }
+        });
+    });
+}).on('hide.bs.modal', function () {
+    $(this).off("click");//解除click绑定
+})
+
+
+/**
  * 监听“编辑用户”事件
  */
 $('#editUser').on('show.bs.modal', function (event) {
@@ -113,6 +292,7 @@ $('#editUser').on('show.bs.modal', function (event) {
         uid = button.data('uid'),
         nickname = button.data('nickname'),
         sex = button.data('sex'),
+        user_right = button.data('user_right'),
         qq = button.data('qq'),
         email = button.data('email')
 
@@ -121,6 +301,7 @@ $('#editUser').on('show.bs.modal', function (event) {
     modal.find('.modal-body #uid').val(uid)
     modal.find('.modal-body #nickname').val(nickname)
     modal.find('.modal-body #sex').val(sex)
+    modal.find('.modal-body #user_right').val(user_right)
     modal.find('.modal-body #qq').val(qq)
     modal.find('.modal-body #email').val(email)
 
@@ -130,7 +311,7 @@ $('#editUser').on('show.bs.modal', function (event) {
         var that = this;
 
         $.ajax({
-            url: 'admin/index.php?action=edit',
+            url: 'index.php?action=edit',
             method: 'POST',
             dataType: 'json',
             data: {
@@ -138,6 +319,7 @@ $('#editUser').on('show.bs.modal', function (event) {
                 nickname: $(".modal-body #nickname").val(),
                 password: $(".modal-body #password").val(),
                 sex: $(".modal-body #sex").val(),
+                user_right: $(".modal-body #user_right").val(),
                 qq: $(".modal-body #qq").val(),
                 email: $(".modal-body #email").val()
             },
@@ -152,7 +334,7 @@ $('#editUser').on('show.bs.modal', function (event) {
                 if (res.code === 0) {
                     $.toastr.success('编辑用户资料（UID: ' + uid + '）成功！即将刷新页面', {
                         position: 'top-right',
-                        time: 2000,
+                        time: 1500,
                         size: 'lg',
                         callback: function () {
                             location.reload();//刷新页面
@@ -187,7 +369,7 @@ $('#editUser').on('show.bs.modal', function (event) {
 function logout() {
     console.info("退出登录");
 
-    document.cookie = "mbToken=;expires=0";
+    window.location.href = "/logout.php?logout=true";
 
     $.toastr.success('退出登陆成功！', {
         position: 'top-right',

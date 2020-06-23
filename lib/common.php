@@ -6,7 +6,11 @@
  * Email: <chenwenzhou@aliyun.com>
  */
 
+//设置页面编码
 header("Content-type:text/html;charset=utf-8");
+
+//设置时区
+date_default_timezone_set("PRC");
 
 define("KEY", "2xr5gwRN8At4iVqi@DWDVWrJ*yfW8Cjo");
 
@@ -45,8 +49,8 @@ if(!empty($_COOKIE['mbToken'])){
     //Token 过期了，需要重新登录
     if(intval($expireTime) <= time()){
         $isLogin = false;
-
-        die("Token 过期了，需要重新登录");
+        setcookie('mbToken', NULL);
+//        die("Token 过期了，需要重新登录 <a href='/login.php'>点击去登录</a>");
     }else{
         $res = $DB->query(sprintf("SELECT uid,user_right,nickname,password FROM users WHERE uid=%d",
             intval($uid)-10000));
@@ -55,8 +59,8 @@ if(!empty($_COOKIE['mbToken'])){
 
         if($token !== crypt($uINFO['password'] . $expireTime, '$1$rasmusle$')){
             $isLogin = false;//鉴权失败，需要重新登录
-
-            die("鉴权失败，需要重新登录");
+            setcookie('mbToken', NULL);
+//            die("鉴权失败，需要重新登录 <a href='/login.php'>点击去登录</a>");
         }
 
         $isLogin = true;

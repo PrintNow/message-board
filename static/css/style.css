@@ -2,8 +2,17 @@ body {
     /*background: url("./img/zhuan.png");*/
 }
 
+
 .media .media-body{
     border-bottom: 1px solid #e4e4e4;
+}
+.media.second{
+    padding-bottom: 16px;
+}
+/*回复不要出现横线*/
+.media .media-body.second{
+    border-bottom: none;
+    padding-bottom: 8px;
 }
 
 /*留言者头像*/

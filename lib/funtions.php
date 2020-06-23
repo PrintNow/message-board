@@ -64,11 +64,11 @@ function formatTime($time)
     list($_y, $_m, $_d, $_h_i) = explode("-", date("Y-m-d-H:i", $time));
 
     if ($y > $_y) {
-        $prefix = "{$y}-{$m}-{$d}";
+        $prefix = "{$_y}-{$_m}-{$_d}";
     }
 
     if ($y === $_y) {
-        $prefix = "{$m}-{$d}";
+        $prefix = "{$_m}-{$_d}";
     }
 
     if ($d === $_d) {

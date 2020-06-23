@@ -2,15 +2,20 @@
 /**
  * 编辑留言
  * User: chuwen
- * Date Time: 2020/6/15 10:26
+ * Date Time: 2020/6/15 11:42
  * Email: <chenwenzhou@aliyun.com>
  */
 
-include_once __DIR__ . "/lib/common.php";
+include_once dirname(__DIR__) . "/lib/common.php";
 
 $cid = intval(get('cid', 0));
 $error = false;
 $uid = '';
+
+if(!$isLogin){
+    header("Location: ../login.php");
+    die("请先登录");
+}
 
 if ($cid < 10001) {
     header("HTTP/1.0 404 Not Found");
@@ -24,10 +29,6 @@ if ($cid < 10001) {
         $row = $res->fetch_assoc();
         $res->free_result();
 
-        if (intval($row['uid']) !== intval($uINFO['uid'])) {
-            $error = '不能修改他人的留言内容';
-        }
-
         if (get('do') === 'update') {
             if ($content === '') {
                 $result = '留言内容不能为空';
@@ -36,7 +37,7 @@ if ($cid < 10001) {
                 $res = $DB->query($sql);
 
                 if ($res) {
-                    $result = '修改留言成功！<b>'.date("Y-m-d H:i:s").'</b>';
+                    $result = '修改留言成功！<b>' . date("Y-m-d H:i:s") . '</b>';
                     $row['contents'] = $content;
                 } else {
                     $result = '修改留言失败！';
@@ -59,8 +60,8 @@ if ($cid < 10001) {
     <meta name="author" content="Wenzhou Chan">
     <title>编辑留言(<?php echo $cid; ?>) - PHP留言板</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.0/dist/css/bootstrap.css">
-    <link rel="stylesheet" href="static/css/style.css">
-    <link rel="stylesheet" href="static/css/toastr.min.css">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="../static/css/toastr.min.css">
 </head>
 <body>
 <nav class="navbar navbar-default navbar-fixed-top affix" role="navigation" id="slider_sub">
@@ -78,9 +79,17 @@ if ($cid < 10001) {
         <div class="collapse navbar-collapse navbar-right" id="example-navbar-collapse">
             <ul class="nav navbar-nav">
                 <li>
-                    <a href="index.php"><span class="glyphicon glyphicon-home" aria-hidden="true"></span> 首页</a>
+                    <a href="/admin/index.php"><span class="glyphicon glyphicon-th-large" aria-hidden="true"></span>
+                        用户管理</a>
                 </li>
-
+                <li class="active">
+                    <a href="/admin/msg.php">
+                        <span class="glyphicon glyphicon-user" aria-hidden="true"></span> 留言管理</a>
+                </li>
+                <li>
+                    <a href="../index.php">
+                        <span class="glyphicon glyphicon-home" aria-hidden="true"></span> 返回首页</a>
+                </li>
                 <?php if ($isLogin): ?>
                     <li class="dropdown">
                         <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown" role="button"
@@ -89,22 +98,21 @@ if ($cid < 10001) {
                             <?php echo $uINFO['nickname']; ?>
                             <span class="caret"></span></a>
                         <ul class="dropdown-menu">
-                            <li><a href="userinfo.php?uid=<?php echo 10000 + intval($uINFO['uid']) ?>">个人资料</a></li>
-                            <li><a href="userinfo.php?uid=<?php echo 10000 + intval($uINFO['uid']) ?>#sendM">发布的留言</a></li>
-                            <?php if (intval($uINFO['user_right']) === 1): ?>
+                            <li><a href="../userinfo.php?uid=<?php echo 10000 + intval($uINFO['uid']) ?>">个人资料</a></li>
+                            <li><a href="../userinfo.php?uid=<?php echo 10000 + intval($uINFO['uid'])
+                                ?>#sendM">发布的留言</a></li>
+                            <?php if(intval($uINFO['user_right']) === 1): ?>
                                 <li role="separator" class="divider"></li>
-                                <li><a href="admin/index.php">后台管理</a></li>
+                                <li><a href="index.php">后台管理</a></li>
                             <?php endif; ?>
                         </ul>
                     </li>
                 <?php else: ?>
                     <li>
-                        <a href="./login.php"><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> 登录</a>
-                    </li><li>
-                        <a href="./reg.php"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> 免费注册</a>
+                        <a href="../login.php">
+                            <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> 登录</a>
                     </li>
                 <?php endif; ?>
-                <li><a href="javascript:logout()">退出登录</a></li>
 
             </ul>
         </div>
@@ -114,7 +122,8 @@ if ($cid < 10001) {
 <div class="container col-md-8 col-md-offset-2" style="padding-top: 72px;">
     <?php if (get('do') === 'update'): ?>
         <div class="alert alert-warning alert-dismissible fade in" role="alert">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                        aria-hidden="true">×</span></button>
             <p><?php echo $result; ?></p>
         </div>
     <?php endif; ?>
@@ -139,7 +148,7 @@ if ($cid < 10001) {
             <div class="form-group">
                 <div style="margin-top: 16px">
                     <div class="col-xs-4">
-                        <a href="index.php" class="btn btn-default btn-lg btn-block">返回首页</a>
+                        <a href="msg.php" class="btn btn-default btn-lg btn-block">返回留言管理</a>
                     </div>
                     <div class="col-xs-8">
                         <button name="submitBtn" data-loading-text="发表留言中..."
@@ -160,7 +169,7 @@ if ($cid < 10001) {
 
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.0/dist/js/bootstrap.min.js"></script>
-<script src="static/js/toastr.min.js"></script>
-<script src="static/js/script.js"></script>
+<script src="../static/js/toastr.min.js"></script>
+<script src="../static/js/script.js"></script>
 </body>
 </html>

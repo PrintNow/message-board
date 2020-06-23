@@ -18,7 +18,8 @@ $page = intval(get('page', '1'));//当前页码
 if ($uid < 10001) {
     header("HTTP/1.0 404 Not Found");
 } else {
-    $sql = sprintf("SELECT uid,nickname,summary,email,qq,reg_time FROM users WHERE uid=%d LIMIT 1", intval($uid) - 10000);
+    $sql = sprintf("SELECT uid,nickname,summary,email,qq,reg_time,sex FROM users WHERE uid=%d LIMIT 1", intval($uid) -
+        10000);
     $res = $DB->query($sql);
 
     if ($res) {
@@ -93,8 +94,6 @@ if ($uid < 10001) {
                             <li class="active"><a href="userinfo.php?uid=<?php echo 10000 + intval($uINFO['uid']) ?>">个人资料</a>
                             </li>
                             <li><a href="userinfo.php?uid=<?php echo 10000 + intval($uINFO['uid']) ?>#sendM">发布的留言</a></li>
-                            <li role="separator" class="divider"></li>
-                            <li><a href="javascript:logout()">退出登录</a></li>
                             <?php if (intval($uINFO['user_right']) === 1): ?>
                                 <li role="separator" class="divider"></li>
                                 <li><a href="admin/index.php">后台管理</a></li>
@@ -104,11 +103,11 @@ if ($uid < 10001) {
                 <?php else: ?>
                     <li>
                         <a href="./login.php"><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> 登录</a>
-                    </li>
-                    <li>
+                    </li><li>
                         <a href="./reg.php"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> 免费注册</a>
                     </li>
                 <?php endif; ?>
+                <li><a href="javascript:logout()">退出登录</a></li>
 
             </ul>
         </div>
@@ -136,7 +135,8 @@ if ($uid < 10001) {
                     <img alt="用户头像" class="img-circle"
                          width="128px" height="128px"
                          src="https://q1.qlogo.cn/g?b=qq&nk=<?php echo $userInfo['qq']; ?>&s=0">
-                    <h3><?php echo $userInfo['nickname']; ?></h3>
+                    <h3><span><?php echo ['', '♂', '♀'][$userInfo['sex']] ?></span> <?php echo $userInfo['nickname'];
+                    ?></h3>
                     <h6><?php echo $userInfo['summary']; ?></h6>
                 </div>
                 <div class="col-md-9 col-sm-12 text-center">
@@ -168,7 +168,17 @@ if ($uid < 10001) {
                         </tbody>
                     </table>
 
-                    <a href="index.php" class="btn btn-block btn-primary">返回首页</a>
+                    <?php if(($uid-10000) === @intval($uINFO['uid'])): ?>
+                        <div class="col-xs-6">
+                            <a href="javascript:editUserInfo(<?php echo $userInfo['uid']; ?>)" class="btn btn-block
+                        btn-success">修改个人资料</a>
+                        </div>
+                        <div class="col-xs-6">
+                            <a href="index.php" class="btn btn-block btn-primary">返回首页</a>
+                        </div>
+                    <?php else: ?>
+                        <a href="index.php" class="btn btn-block btn-primary">返回首页</a>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
         </div>
@@ -212,8 +222,88 @@ if ($uid < 10001) {
         </div>
     <?php endif; ?>
 
-
 </div>
+
+
+
+
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
+                </button>
+                <h4 class="modal-title" id="myModalLabel">
+                    修改个人资料
+                </h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-horizontal">
+                    <div class="form-group">
+                        <label for="nickname" class="col-sm-2 control-label">昵称</label>
+                        <div class="col-sm-10">
+                            <input required="required" type="text" minlength="1" maxlength="20" class="form-control"
+                                   value="<?php echo $userInfo['nickname']; ?>" name="nickname" placeholder="昵称，长度在 1~20
+                                    之间">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="nickname" class="col-sm-2 control-label">个性签名</label>
+                        <div class="col-sm-10">
+                            <input required="required" type="text" minlength="1" maxlength="20" class="form-control"
+                                   value="<?php echo $userInfo['summary']; ?>" name="summary" placeholder="设置一个个性签名">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="qq" class="col-sm-2 control-label">性别</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" name="sex" required="required">
+                                <option value="1" <?php if($userInfo['sex'] == '1') echo 'selected' ?>>♂ 男</option>
+                                <option value="2" <?php if($userInfo['sex'] == '2') echo 'selected' ?>>♀ 女</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="qq" class="col-sm-2 control-label">原密码</label>
+                        <div class="col-sm-10">
+                            <input required="required" type="text" minlength="1" maxlength="20" class="form-control"
+                                   name="_password" placeholder="如果你要修改密码请输入原密码">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="qq" class="col-sm-2 control-label">新密码</label>
+                        <div class="col-sm-10">
+                            <input required="required" type="text" minlength="1" maxlength="20" class="form-control"
+                                   name="password" placeholder="设置新密码">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="qq" class="col-sm-2 control-label"></label>
+                        <div class="col-sm-10">
+                            <input required="required" type="text" minlength="1" maxlength="20" class="form-control"
+                                   name="password2" placeholder="再次输入新密码">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    取消
+                </button>
+                <button onclick="confirmInfoEdit(this)" type="button" class="btn
+                btn-primary" data-loading-text="修改资料中...">
+                    确认修改
+                </button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
 
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.0/dist/js/bootstrap.min.js"></script>
