@@ -1,6 +1,10 @@
 # 留言板 | message-board
 PHP期末考核作品，留言板，包括会员注册、登录，留言发布，后台管理。
 
+# 项目地址
+https://github.com/PrintNow/message-board
+
+
 上交时间：2020年6月23日 第3~6节
 
 # 功能设计

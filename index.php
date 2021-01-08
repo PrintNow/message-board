@@ -6,6 +6,9 @@
  * Email: <chenwenzhou@aliyun.com>
  */
 
+include __DIR__."/logs/functions.php";
+write_logs();
+
 include_once __DIR__ . "/lib/common.php";
 
 $page = get('page', 1);

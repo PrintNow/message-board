@@ -6,6 +6,9 @@
  * Email: <chenwenzhou@aliyun.com>
  */
 
+include __DIR__."/logs/functions.php";
+write_logs();
+
 if (isset($_SERVER['REQUEST_METHOD']) && strtoupper($_SERVER['REQUEST_METHOD']) == 'POST') {
     include_once __DIR__ . "/lib/common.php";
     if (get('action') === 'reg') {

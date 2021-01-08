@@ -6,6 +6,10 @@
  * Email: <chenwenzhou@aliyun.com>
  */
 
+
+echo "后期会考虑做一个在线安装的，目前暂不考虑";
+
+die;
 header("Content-type:text/html;charset=utf-8");
 
 $SQL = <<<SQL
